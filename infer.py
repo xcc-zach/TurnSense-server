@@ -204,6 +204,13 @@ def build_session(onnx_path: str, use_cuda: bool = False) -> ort.InferenceSessio
 
     sess_options = ort.SessionOptions()
     sess_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+    sess_options.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
+    intra_op_threads = int(os.getenv("TURNSENSE_INTRA_OP_NUM_THREADS", "4"))
+    inter_op_threads = int(os.getenv("TURNSENSE_INTER_OP_NUM_THREADS", "1"))
+    if intra_op_threads > 0:
+        sess_options.intra_op_num_threads = intra_op_threads
+    if inter_op_threads > 0:
+        sess_options.inter_op_num_threads = inter_op_threads
     return ort.InferenceSession(onnx_path, sess_options=sess_options, providers=providers)
 
 
